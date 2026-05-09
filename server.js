@@ -2237,6 +2237,18 @@ class Player {
         if (len > 0) {
             mx /= len; mz /= len;
             // Camera-relative movement: yaw rotates input vector to world space
+    processInput(dt, room) {
+        if (this.dead || this.stunTimer > 0) return;
+        const input = this.input;
+        let mx = 0, mz = 0;
+        if (input.forward) mz -= 1;
+        if (input.backward) mz += 1;
+        if (input.left) mx -= 1;
+        if (input.right) mx += 1;
+        const len = Math.hypot(mx, mz);
+        if (len > 0) { mx /= len; mz /= len; }
+
+        if (mx !== 0 || mz !== 0) {
             const yaw = this.cameraYaw;
             const wx = mx * Math.cos(yaw) + mz * Math.sin(yaw);
             const wz = -mx * Math.sin(yaw) + mz * Math.cos(yaw);
@@ -2257,13 +2269,13 @@ class Player {
         } else if (this.onGround) {
             this.velocity.x = lerp(this.velocity.x, 0, Math.min(1, dt * CONFIG.FRICTION));
             this.velocity.z = lerp(this.velocity.z, 0, Math.min(1, dt * CONFIG.FRICTION));
-        }            this.velocity.x = lerp(this.velocity.x, 0, dt * CONFIG.FRICTION);
-            this.velocity.z = lerp(this.velocity.z, 0, dt * CONFIG.FRICTION);
         }
+
         if (input.jump && !this.jumpHeld) {
             if (this.onGround) {
                 this.velocity.y = CONFIG.JUMP_VELOCITY * this.character.stats.jumpHeight;
-                this.onGround = false; this.canDoubleJump = true;
+                this.onGround = false;
+                this.canDoubleJump = true;
             } else if (this.canDoubleJump) {
                 this.velocity.y = CONFIG.DOUBLE_JUMP_VELOCITY * this.character.stats.jumpHeight;
                 this.canDoubleJump = false;
@@ -2271,16 +2283,25 @@ class Player {
             }
         }
         this.jumpHeld = input.jump;
+
         if (input.dash && !this.dashHeld && this.dashCharges > 0 && !this.isDashing) {
             this.dashCharges--;
             if (this.dashRechargeTimer <= 0) this.dashRechargeTimer = CONFIG.DASH_RECHARGE_TIME;
-            this.isDashing = true; this.dashTimer = CONFIG.DASH_DURATION;
-            const dir = (mx === 0 && mz === 0) ? this.getFacingDir() : normalize3({ x: mx * Math.cos(this.cameraYaw) - mz * Math.sin(this.cameraYaw), y: 0, z: mx * Math.sin(this.cameraYaw) + mz * Math.cos(this.cameraYaw) });
+            this.isDashing = true;
+            this.dashTimer = CONFIG.DASH_DURATION;
+            const dir = (mx === 0 && mz === 0)
+                ? this.getFacingDir()
+                : normalize3({
+                    x: mx * Math.cos(this.cameraYaw) + mz * Math.sin(this.cameraYaw),
+                    y: 0,
+                    z: -mx * Math.sin(this.cameraYaw) + mz * Math.cos(this.cameraYaw)
+                });
             this.dashDir = dir;
             this.invulnTimer = Math.max(this.invulnTimer, 0.15);
             room.broadcastEffect('dash', { position: this.position, dir, color: this.character.auraColor });
         }
         this.dashHeld = input.dash;
+
         if (this.isDashing) {
             this.dashTimer -= dt;
             this.velocity.x = this.dashDir.x * CONFIG.DASH_SPEED;
@@ -2288,6 +2309,8 @@ class Player {
             this.velocity.y = Math.max(this.velocity.y, -1);
             if (this.dashTimer <= 0) this.isDashing = false;
         }
+    }
+
         this.isBlocking = !!input.block;
         if (input.parry && !this.parryHeld) this.parryTimer = CONFIG.PARRY_WINDOW;
         this.parryHeld = input.parry;
