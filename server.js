@@ -1749,6 +1749,8 @@ class Player {
         this.connected = true;
         this.ping = 0;
         this.spawnInvuln = 2.0;
+        this.input = {};
+        this.lastInput = {};
     }
 
     reset(spawnPoint) {
@@ -2031,7 +2033,7 @@ class Player {
                     ownerId: this.id, team: this.team,
                     position: { x: this.position.x + dir.x * 1.2, y: this.position.y + 1.2, z: this.position.z + dir.z * 1.2 },
                     velocity: vecScale(dir, speed),
-                    damage: baseDamage / (ab.projectileCount && !ab.beam ? 1 : 1),
+                    damage: baseDamage,
                     radius: 0.4, width: ab.projectileWidth || 0.8,
                     lifetime: ab.range / speed + 0.5,
                     statusApply: ab.statusApply || [],
@@ -2147,7 +2149,7 @@ class Player {
         for (const k in this.cooldowns) if (this.cooldowns[k] > 0) this.cooldowns[k] -= dt;
         this.outOfCombatTimer += dt;
         this.mp = Math.min(this.maxMp, this.mp + this.character.stats.mpRegen * dt);
-         if (this.characterId === 'naruto' && this.outOfCombatTimer > 0) this.hp = Math.min(this.maxHp, this.hp + 2 * dt);
+        if (this.characterId === 'naruto' && this.outOfCombatTimer > 0) this.hp = Math.min(this.maxHp, this.hp + 2 * dt);
         if (this.characterId === 'nezuko' && this.outOfCombatTimer > 4) this.hp = Math.min(this.maxHp, this.hp + 3 * dt);
         if (this.dashCharges < CONFIG.DASH_CHARGES_MAX) {
             this.dashRechargeTimer -= dt;
@@ -2231,9 +2233,8 @@ class Player {
     }
 
     processInput(dt, room) {
-
-        if (this.dead || this.stunTimer > 0) return;
-        const input = this.input;
+        if (this.dead) return;
+        const input = this.input || {};
         let mx = 0, mz = 0;
         if (input.forward) mz -= 1;
         if (input.backward) mz += 1;
@@ -2251,7 +2252,6 @@ class Player {
             const tt = Math.min(1, ctrl * dt * 12);
             this.velocity.x = lerp(this.velocity.x, wx * speed, tt);
             this.velocity.z = lerp(this.velocity.z, wz * speed, tt);
-            // Face movement direction (only if not locked-on)
             if (!this.lockOnTarget) {
                 this.rotation = Math.atan2(wx, wz);
             } else {
@@ -2303,7 +2303,6 @@ class Player {
             this.velocity.y = Math.max(this.velocity.y, -1);
             if (this.dashTimer <= 0) this.isDashing = false;
         }
-    }
 
         this.isBlocking = !!input.block;
         if (input.parry && !this.parryHeld) this.parryTimer = CONFIG.PARRY_WINDOW;
@@ -2351,14 +2350,12 @@ class Player {
         this.position.x = clamp(this.position.x, -half, half);
         this.position.z = clamp(this.position.z, -half, half);
         this.onGround = false;
-        // Ground - player position.y = bottom of feet, model offset handles rest
         if (this.position.y <= 1.0) {
             this.position.y = 1.0;
             this.velocity.y = 0;
             this.onGround = true;
             this.canDoubleJump = true;
         }
-        // Platforms - check feet-on-top
         for (const plat of room.map.platforms) {
             const px = plat.x, pz = plat.z, py = plat.y;
             const hw = plat.w / 2, hd = plat.d / 2, hh = plat.h / 2;
@@ -2366,7 +2363,6 @@ class Player {
             const inX = this.position.x > px - hw - 0.4 && this.position.x < px + hw + 0.4;
             const inZ = this.position.z > pz - hd - 0.4 && this.position.z < pz + hd + 0.4;
             if (inX && inZ) {
-                // Standing on top
                 if (this.position.y >= top - 0.1 && this.position.y <= top + 1.0 && this.velocity.y <= 0) {
                     this.position.y = top + 1.0;
                     this.velocity.y = 0;
@@ -2375,8 +2371,6 @@ class Player {
                 }
             }
         }
-        if (this.position.y < CONFIG.MIN_Y_DEATH) this.die(null, room);
-    }
         if (this.position.y < CONFIG.MIN_Y_DEATH) this.die(null, room);
     }
 
