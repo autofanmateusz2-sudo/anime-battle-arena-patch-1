@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Battle Arena 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- LOADING SCREEN                                                -->
+<!-- ============================================================ -->
+<div id="loading-screen" class="screen active">
+    <div class="loading-content">
+        <h1 class="title-glow">ANIME BATTLE ARENA</h1>
+        <h2 class="subtitle">3D Multiplayer</h2>
+        <div class="loading-bar-wrap">
+            <div id="loading-bar" class="loading-bar"></div>
+        </div>
+        <p id="loading-text" class="loading-text">Connecting to server...</p>
+    </div>
+    <div class="bg-particles"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MAIN MENU                                                     -->
+<!-- ============================================================ -->
+<div id="main-menu" class="screen">
+    <div class="menu-bg"></div>
+    <div class="menu-content">
+        <h1 class="title-glow">ANIME BATTLE ARENA</h1>
+        <p class="subtitle">Choose Your Path, Warrior</p>
+        <div class="menu-input-row">
+            <label>Your Name:</label>
+            <input id="player-name" type="text" maxlength="16" placeholder="Enter name..." value="">
+        </div>
+        <div class="menu-buttons">
+            <button id="btn-quickplay" class="btn btn-primary">Quick Play</button>
+            <button id="btn-create" class="btn btn-secondary">Create Room</button>
+            <button id="btn-browse" class="btn btn-secondary">Browse Rooms</button>
+            <button id="btn-tutorial" class="btn btn-tertiary">How to Play</button>
+        </div>
+        <div class="menu-footer">
+            <span id="connection-status" class="conn-good">● Connected</span>
+            <span id="ping-display">Ping: -- ms</span>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CHARACTER SELECT                                              -->
+<!-- ============================================================ -->
+<div id="character-select" class="screen">
+    <div class="char-select-header">
+        <h2>SELECT YOUR FIGHTER</h2>
+        <button id="char-back" class="btn-small">← Back</button>
+    </div>
+    <div class="char-select-body">
+        <div id="char-grid" class="char-grid"></div>
+        <div class="char-detail">
+            <div id="char-portrait" class="char-portrait">
+                <div id="char-portrait-aura" class="portrait-aura"></div>
+                <div id="char-portrait-fig" class="portrait-fig"></div>
+            </div>
+            <div class="char-info">
+                <h3 id="char-name">Select a character</h3>
+                <p id="char-title" class="char-title-text"></p>
+                <p id="char-anime" class="char-anime"></p>
+                <div class="char-stats">
+                    <div class="stat-row"><span>HP</span><div class="stat-bar"><div id="stat-hp" class="stat-fill"></div></div></div>
+                    <div class="stat-row"><span>MP</span><div class="stat-bar"><div id="stat-mp" class="stat-fill mp"></div></div></div>
+                    <div class="stat-row"><span>Speed</span><div class="stat-bar"><div id="stat-speed" class="stat-fill speed"></div></div></div>
+                    <div class="stat-row"><span>Damage</span><div class="stat-bar"><div id="stat-dmg" class="stat-fill dmg"></div></div></div>
+                    <div class="stat-row"><span>Defense</span><div class="stat-bar"><div id="stat-def" class="stat-fill def"></div></div></div>
+                </div>
+                <div class="char-passive">
+                    <h4>Passive: <span id="char-passive-name"></span></h4>
+                    <p id="char-passive-desc"></p>
+                </div>
+                <div class="char-abilities" id="char-abilities"></div>
+                <button id="char-confirm" class="btn btn-primary">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- LOBBY                                                         -->
+<!-- ============================================================ -->
+<div id="lobby" class="screen">
+    <div class="lobby-header">
+        <h2 id="lobby-title">Lobby</h2>
+        <button id="lobby-leave" class="btn-small">Leave</button>
+    </div>
+    <div class="lobby-body">
+        <div class="lobby-left">
+            <h3>Players (<span id="lobby-count">0</span>/<span id="lobby-max">8</span>)</h3>
+            <div id="lobby-players" class="lobby-player-list"></div>
+        </div>
+        <div class="lobby-right">
+            <h3>Match Settings</h3>
+            <div class="lobby-setting"><label>Mode:</label><span id="lobby-mode">FFA</span></div>
+            <div class="lobby-setting"><label>Map:</label><span id="lobby-map">Random</span></div>
+            <div class="lobby-setting"><label>Score Limit:</label><span id="lobby-score">20</span></div>
+            <div class="lobby-setting"><label>Time Limit:</label><span id="lobby-time">5:00</span></div>
+            <button id="lobby-change-char" class="btn btn-tertiary">Change Character</button>
+            <button id="lobby-start" class="btn btn-primary">START MATCH</button>
+            <p id="lobby-host-only" class="hint-text">Only host can start</p>
+        </div>
+    </div>
+    <div class="lobby-chat">
+        <div id="lobby-chat-log" class="chat-log"></div>
+        <div class="chat-input-wrap">
+            <input id="lobby-chat-input" type="text" placeholder="Press Enter to chat..." maxlength="120">
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ROOM BROWSER                                                  -->
+<!-- ============================================================ -->
+<div id="room-browser" class="screen">
+    <div class="lobby-header">
+        <h2>Browse Rooms</h2>
+        <div>
+            <button id="rooms-refresh" class="btn-small">Refresh</button>
+            <button id="rooms-back" class="btn-small">← Back</button>
+        </div>
+    </div>
+    <div id="rooms-list" class="rooms-list"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- CREATE ROOM                                                   -->
+<!-- ============================================================ -->
+<div id="create-room" class="screen">
+    <div class="lobby-header">
+        <h2>Create Room</h2>
+        <button id="create-back" class="btn-small">← Back</button>
+    </div>
+    <div class="create-form">
+        <div class="form-row">
+            <label>Game Mode:</label>
+            <select id="create-mode">
+                <option value="ffa">Free For All (2-8)</option>
+                <option value="duel">1v1 Duel</option>
+                <option value="tdm">Team Deathmatch 3v3</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label>Map:</label>
+            <select id="create-map">
+                <option value="">Random</option>
+                <option value="tokyo_night">Tokyo Rooftops</option>
+                <option value="temple">Sacred Temple</option>
+                <option value="space_dojo">Cosmic Dojo</option>
+            </select>
+        </div>
+        <button id="create-confirm" class="btn btn-primary">CREATE</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TUTORIAL                                                      -->
+<!-- ============================================================ -->
+<div id="tutorial" class="screen">
+    <div class="lobby-header">
+        <h2>How to Play</h2>
+        <button id="tutorial-back" class="btn-small">← Back</button>
+    </div>
+    <div class="tutorial-content">
+        <h3>Movement</h3>
+        <p><kbd>W A S D</kbd> Move &nbsp; <kbd>Space</kbd> Jump (double jump in air) &nbsp; <kbd>Shift</kbd> Dash (3 charges) &nbsp; <kbd>Mouse</kbd> Camera</p>
+        <h3>Combat</h3>
+        <p><kbd>LMB</kbd> Light Attack &nbsp; <kbd>RMB</kbd> Heavy Attack &nbsp; <kbd>Q E R</kbd> Abilities &nbsp; <kbd>F</kbd> Ultimate</p>
+        <p><kbd>C</kbd> Block (-70% damage) &nbsp; <kbd>V</kbd> Parry (perfect timing reflects) &nbsp; <kbd>Tab</kbd> Lock-on</p>
+        <h3>Resources</h3>
+        <p>HP - your health. MP - regenerates over time, used for abilities. ULT GAUGE - charges from damage, used for ultimate (F).</p>
+        <h3>Combos</h3>
+        <p>Chain hits to build combo counter. More hits = more damage scaling but caps out. Heavy attacks launch enemies into the air for juggle combos.</p>
+        <h3>Tips</h3>
+        <p>Each character has a unique passive — read it on the select screen! Some transform at low HP, some place markers, some have lifesteal.</p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- IN-GAME HUD                                                   -->
+<!-- ============================================================ -->
+<div id="game-screen" class="screen">
+    <canvas id="game-canvas"></canvas>
+    
+    <div id="hud">
+        <!-- Top bar -->
+        <div id="hud-top">
+            <div id="hud-timer">5:00</div>
+            <div id="hud-scores"></div>
+        </div>
+
+        <!-- Bottom-left: HP/MP/Ult -->
+        <div id="hud-bottom-left">
+            <div class="hud-name-row">
+                <span id="hud-name">Player</span>
+                <span id="hud-character">Character</span>
+            </div>
+            <div class="bar-wrap">
+                <div class="bar-label">HP</div>
+                <div class="bar"><div id="bar-hp" class="bar-fill hp"></div></div>
+                <span id="hp-text">100/100</span>
+            </div>
+            <div class="bar-wrap">
+                <div class="bar-label">MP</div>
+                <div class="bar"><div id="bar-mp" class="bar-fill mp"></div></div>
+                <span id="mp-text">100/100</span>
+            </div>
+            <div class="bar-wrap">
+                <div class="bar-label">ULT</div>
+                <div class="bar"><div id="bar-ult" class="bar-fill ult"></div></div>
+                <span id="ult-text">0%</span>
+            </div>
+            <div id="status-icons" class="status-icons"></div>
+        </div>
+
+        <!-- Bottom-right: abilities -->
+        <div id="hud-bottom-right">
+            <div class="ability-slot" data-slot="light"><div class="ab-key">LMB</div><div class="ab-name" id="ab-light">Light</div><div class="ab-cd" id="cd-light"></div></div>
+            <div class="ability-slot" data-slot="heavy"><div class="ab-key">RMB</div><div class="ab-name" id="ab-heavy">Heavy</div><div class="ab-cd" id="cd-heavy"></div></div>
+            <div class="ability-slot" data-slot="q"><div class="ab-key">Q</div><div class="ab-name" id="ab-q">Q</div><div class="ab-cd" id="cd-q"></div></div>
+            <div class="ability-slot" data-slot="e"><div class="ab-key">E</div><div class="ab-name" id="ab-e">E</div><div class="ab-cd" id="cd-e"></div></div>
+            <div class="ability-slot" data-slot="r"><div class="ab-key">R</div><div class="ab-name" id="ab-r">R</div><div class="ab-cd" id="cd-r"></div></div>
+            <div class="ability-slot ult-slot" data-slot="f"><div class="ab-key">F</div><div class="ab-name" id="ab-f">ULT</div><div class="ab-cd" id="cd-f"></div></div>
+        </div>
+
+        <!-- Dash charges -->
+        <div id="hud-dash">
+            <span class="dash-label">DASH</span>
+            <div class="dash-charges">
+                <div class="dash-pip" id="dash-1"></div>
+                <div class="dash-pip" id="dash-2"></div>
+                <div class="dash-pip" id="dash-3"></div>
+            </div>
+        </div>
+
+        <!-- Combo counter -->
+        <div id="hud-combo" class="hud-combo hidden">
+            <div class="combo-num" id="combo-num">0</div>
+            <div class="combo-label">COMBO</div>
+        </div>
+
+        <!-- Killfeed -->
+        <div id="killfeed"></div>
+
+        <!-- Crosshair -->
+        <div id="crosshair">
+            <div class="cross-h"></div><div class="cross-v"></div>
+        </div>
+
+        <!-- Lock-on indicator -->
+        <div id="lockon-indicator" class="hidden"></div>
+
+        <!-- Damage popups container -->
+        <div id="damage-popups"></div>
+
+        <!-- Death overlay -->
+        <div id="death-overlay" class="hidden">
+            <h2>YOU DIED</h2>
+            <p>Respawn in <span id="respawn-timer">4</span>s</p>
+        </div>
+
+        <!-- Match end -->
+        <div id="match-end" class="hidden">
+            <h1 id="match-end-winner">Winner</h1>
+            <div id="match-standings"></div>
+            <button id="match-continue" class="btn btn-primary">Continue</button>
+        </div>
+
+        <!-- In-game chat -->
+        <div id="ingame-chat">
+            <div id="ingame-chat-log"></div>
+            <input id="ingame-chat-input" type="text" placeholder="Press T to chat" maxlength="120">
+        </div>
+
+        <!-- FPS / debug -->
+        <div id="debug-overlay">
+            <span id="fps">FPS: --</span>
+            <span id="ping-ingame">Ping: --</span>
+        </div>
+
+        <!-- Pause menu -->
+        <div id="pause-menu" class="hidden">
+            <div class="pause-content">
+                <h2>PAUSED</h2>
+                <button id="pause-resume" class="btn btn-primary">Resume</button>
+                <button id="pause-leave" class="btn btn-secondary">Leave Match</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- THREE.JS + SOCKET.IO + CLIENT                                 -->
+<!-- ============================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>
