@@ -2147,7 +2147,7 @@ class Player {
         for (const k in this.cooldowns) if (this.cooldowns[k] > 0) this.cooldowns[k] -= dt;
         this.outOfCombatTimer += dt;
         this.mp = Math.min(this.maxMp, this.mp + this.character.stats.mpRegen * dt);
-        if (this.characterId === 'naruto' && this.outOfCombatTimer > 0) this.hp = Math.min(this.maxHp, this.hp + 2 * dt);
+         if (this.characterId === 'naruto' && this.outOfCombatTimer > 0) this.hp = Math.min(this.maxHp, this.hp + 2 * dt);
         if (this.characterId === 'nezuko' && this.outOfCombatTimer > 4) this.hp = Math.min(this.maxHp, this.hp + 3 * dt);
         if (this.dashCharges < CONFIG.DASH_CHARGES_MAX) {
             this.dashRechargeTimer -= dt;
@@ -2221,23 +2221,17 @@ class Player {
             setTimeout(() => { this.maskActive = false; }, 8000);
             room.broadcastEffect('transform', { position: this.position, type: 'hollow_mask' });
         }
-        if (input && !this.isDisabled()) this.processInput(input, dt, room);
+        if (input && !this.isDisabled()) {
+            if (typeof input.cameraYaw === 'number') this.cameraYaw = input.cameraYaw;
+            if (typeof input.cameraPitch === 'number') this.cameraPitch = clamp(input.cameraPitch, -1.4, 1.4);
+            this.input = input;
+            this.processInput(dt, room);
+        }
         this.applyPhysics(dt, room);
     }
 
-    processInput(input, dt, room) {
-        if (typeof input.cameraYaw === 'number') this.cameraYaw = input.cameraYaw;
-        if (typeof input.cameraPitch === 'number') this.cameraPitch = clamp(input.cameraPitch, -1.4, 1.4);
- let mx = 0, mz = 0;
-        if (input.forward) mz -= 1;
-        if (input.backward) mz += 1;
-        if (input.left) mx -= 1;
-        if (input.right) mx += 1;
-        const len = Math.sqrt(mx * mx + mz * mz);
-        if (len > 0) {
-            mx /= len; mz /= len;
-            // Camera-relative movement: yaw rotates input vector to world space
     processInput(dt, room) {
+
         if (this.dead || this.stunTimer > 0) return;
         const input = this.input;
         let mx = 0, mz = 0;
